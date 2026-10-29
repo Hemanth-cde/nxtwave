@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build Your First AI Project in 60 Minutes | NxtWave</title>
+<style>
+:root{--bg:#f8fafc;--card:#fff;--ink:#0f172a;--mute:#64748b;--line:#e2e8f0;--pri:#4f46e5;--ok:#059669;--okbg:#ecfdf5}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1220;--card:#131c2e;--ink:#e8edf7;--mute:#97a3b9;--line:#26324a;--pri:#6366f1;--ok:#34d399;--okbg:#0c2a22}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,sans-serif}
+.w{max-width:640px;margin:0 auto;padding:0 18px 48px}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px 0}
+h1{font-size:clamp(1.6rem,6vw,2.2rem);line-height:1.15;margin:8px 0 10px}h2{font-size:1.1rem;margin:0 0 10px}
+.mute{color:var(--mute)}.card{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:18px;margin-top:16px}
+ul{margin:0;padding:0;list-style:none}li{padding:8px 0 8px 26px;position:relative;border-top:1px solid var(--line)}li:first-child{border-top:0}li:before{content:"✓";position:absolute;left:2px;color:var(--ok);font-weight:700}
+label{display:block;font-weight:600;font-size:.9rem;margin:14px 0 4px}
+input{width:100%;font:inherit;padding:11px 12px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--ink)}
+button{font:inherit;cursor:pointer}.p{width:100%;margin-top:18px;font-weight:700;padding:13px;border:0;border-radius:8px;background:var(--pri);color:#fff}
+.s{font-weight:600;padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.lk{background:none;border:0;color:var(--mute);text-decoration:underline}
+.seg{display:flex;gap:8px}.seg button{flex:1;padding:10px;border-radius:8px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:600}.seg .on{background:var(--ink);color:var(--bg)}
+.badge{display:inline-block;background:var(--okbg);color:var(--ok);font-weight:600;font-size:.9rem;padding:5px 12px;border-radius:99px}
+.err{color:#dc2626;font-size:.9rem;min-height:1.3em;margin:8px 0 0}
+.big{font:700 2rem/1.2 ui-monospace,Menlo,monospace;letter-spacing:.05em}.num{font-size:2.6rem;font-weight:800;line-height:1}
+.box{word-break:break-all;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;font:.9rem ui-monospace,monospace}
+table{width:100%;border-collapse:collapse;font-size:.92rem;min-width:420px}th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--line)}th{color:var(--mute);font-weight:500}.sc{overflow-x:auto}
+</style>
+</head>
+<body><div class="w" id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.umd.js"></script>
+<script>
+const {useState,useEffect}=React,html=htm.bind(React.createElement);
+const GET=['Build and deploy a real AI project in one live 60-minute session','Publish it to your GitHub with a live demo link recruiters can open','Get 3 ATS-friendly resume bullets describing the project','Free for final-year engineering students, all branches','Pre-workshop prep kit: 30 AI interview Q&A and boilerplate code'];
+const api=async(url,opt={},token)=>{const r=await fetch(url,{...opt,headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{}),...(opt.headers||{})}});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Something went wrong.');return d};
+const Benefits=()=>html`<section className="card"><h2>What you get</h2><ul>${GET.map(x=>html`<li key=${x}>${x}</li>`)}</ul></section>`;
+
+function Auth({onDone}){
+ const urlRef=new URLSearchParams(location.search).get('ref')||'';
+ const[mode,setMode]=useState('register'),[role,setRole]=useState('student'),[err,setErr]=useState('');
+ const[f,setF]=useState({name:'',phone:'',college:'',pin:'',refCode:urlRef});
+ const set=k=>e=>setF({...f,[k]:e.target.value});
+ const submit=async e=>{e.preventDefault();setErr('');
+  try{onDone(await api(mode==='login'?'/api/login':'/api/register',{method:'POST',body:JSON.stringify({...f,role})}))}catch(x){setErr(x.message)}};
+ return html`<h1>Build your first AI project in 60 minutes.</h1>
+ <p className="mute">A free live workshop for final-year engineering students getting ready for campus placements.</p>
+ <${Benefits}/>
+ <form className="card" onSubmit=${submit}>
+  <div className="seg" style=${{marginBottom:12}}><button type="button" className=${mode==='register'?'on':''} onClick=${()=>setMode('register')}>Sign up</button><button type="button" className=${mode==='login'?'on':''} onClick=${()=>setMode('login')}>Log in</button></div>
+  ${mode==='register'&&html`<div className="seg"><button type="button" className=${role==='student'?'on':''} onClick=${()=>setRole('student')}>I’m a student</button><button type="button" className=${role==='ambassador'?'on':''} onClick=${()=>setRole('ambassador')}>I’m an ambassador</button></div>`}
+  ${mode==='register'&&html`<label>Full name</label><input value=${f.name} onChange=${set('name')} autoComplete="name"/>`}
+  <label>WhatsApp number</label><input value=${f.phone} onChange=${set('phone')} inputMode="numeric" maxLength="10"/>
+  ${mode==='register'&&html`<label>College name</label><input value=${f.college} onChange=${set('college')}/>`}
+  <label>${mode==='login'?'4-digit PIN':'Create a 4-digit PIN'}</label><input type="password" value=${f.pin} onChange=${set('pin')} inputMode="numeric" maxLength="4"/>
+  ${mode==='register'&&role==='ambassador'&&html`<p className="mute" style=${{margin:'12px 0 0',fontSize:'.9rem'}}>Ambassadors are approved by the organiser. You get your referral code after approval.</p>`}
+  ${mode==='register'&&role==='student'&&html`<label>Referral code (optional)</label><input value=${f.refCode} onChange=${set('refCode')} placeholder="From your ambassador"/>
+   ${f.refCode&&html`<p style=${{margin:'8px 0 0'}}><span className="badge">Referral applied: ${f.refCode.toUpperCase()}</span></p>`}`}
+  <p className="err">${err}</p>
+  <button className="p">${mode==='login'?'Log in':role==='ambassador'?'Register as ambassador':'Claim my seat'}</button></form>`}
+
+function Student({me}){
+ return html`<span className="badge">You’re in</span><h1>Welcome, ${me.name.split(' ')[0]}.</h1>
+ <p className="mute">Your seat is reserved. We’ll confirm the session time on WhatsApp (${me.phone}).</p>
+ <section className="card"><h2>What you’re getting into</h2><p style=${{margin:0}}>A live 60-minute build session. You build the project with a mentor, push it to GitHub and leave with your resume bullets.</p></section>
+ <${Benefits}/>
+ <section className="card"><h2>Referral</h2><p style=${{margin:0}}>${me.referredBy?html`You joined through <b>${me.referredByName}</b>.`:'You joined without a referral code.'}</p></section>`}
+
+function Ambassador({me,refresh}){
+ if(!me.approved)return html`<span className="badge">Pending</span><h1>Thanks, ${me.name.split(' ')[0]}.</h1><section className="card"><p style=${{margin:0}}>Your ambassador request is waiting for approval. Once approved, you’ll get your referral code and link here.</p><button className="s" style=${{marginTop:12}} onClick=${refresh}>Check status</button></section>`;
+ const link=location.origin+'/?ref='+me.code;const[c,setC]=useState(false);
+ return html`<span className="badge">Ambassador</span><h1>Hi, ${me.name.split(' ')[0]}.</h1>
+ <section className="card"><p className="mute" style=${{margin:'0 0 4px'}}>Your referral code</p><div className="big">${me.code}</div>
+  <p className="mute" style=${{margin:'14px 0 6px'}}>Your link</p><div className="box">${link}</div>
+  <div style=${{display:'flex',gap:8,marginTop:10,flexWrap:'wrap'}}><button className="s" onClick=${()=>{try{navigator.clipboard.writeText(link)}catch(e){}setC(true)}}>${c?'Copied':'Copy link'}</button>
+  <a className="s" style=${{textDecoration:'none'}} target="_blank" rel="noopener" href=${'https://wa.me/?text='+encodeURIComponent('Grab your free seat for the NxtWave 60-minute AI project workshop: '+link)}>Share on WhatsApp</a></div></section>
+ <section className="card"><p className="mute" style=${{margin:'0 0 4px'}}>Students who joined with your code</p><div className="num">${me.referralCount}</div>
+  <div className="sc" style=${{marginTop:12}}><table><tr><th>Name</th><th>College</th><th>Joined</th></tr>
+  ${me.referrals.length?me.referrals.map((r,i)=>html`<tr key=${i}><td>${r.name}</td><td>${r.college}</td><td>${new Date(r.joined).toLocaleDateString()}</td></tr>`):html`<tr><td colSpan="3" className="mute">No referrals yet. Share your link.</td></tr>`}</table></div>
+  <button className="s" style=${{marginTop:12}} onClick=${refresh}>Refresh count</button></section>`}
+
+function Admin(){
+ const[key,setKey]=useState(''),[d,setD]=useState(null),[err,setErr]=useState('');
+ const load=async()=>{setErr('');try{setD(await api('/api/admin/report',{headers:{'x-admin-key':key}}))}catch(x){setErr(x.message)}};
+ const act=async(p,id)=>{try{await api('/api/admin/'+p,{method:'POST',body:JSON.stringify({id}),headers:{'x-admin-key':key}});load()}catch(x){setErr(x.message)}};
+ return html`<h1 style=${{fontSize:'1.6rem'}}>Admin</h1>
+ ${!d?html`<form className="card" onSubmit=${e=>{e.preventDefault();load()}}><label>Admin key</label><input type="password" value=${key} onChange=${e=>setKey(e.target.value)}/><p className="err">${err}</p><button className="p">Open admin</button></form>`
+ :html`<p className="err">${err}</p>
+ <section className="card sc"><h2>Pending ambassador requests (${d.pending.length})</h2><table><tr><th>Name</th><th>College</th><th>WhatsApp</th><th></th></tr>
+ ${d.pending.length?d.pending.map(r=>html`<tr key=${r.id}><td>${r.name}</td><td>${r.college}</td><td>${r.phone}</td><td style=${{whiteSpace:'nowrap'}}><button className="s" onClick=${()=>act('approve',r.id)}>Approve</button> <button className="s" onClick=${()=>act('reject',r.id)}>Reject</button></td></tr>`):html`<tr><td colSpan="4" className="mute">No pending requests.</td></tr>`}</table></section>
+ <section className="card sc"><h2>Approved ambassadors and referrals</h2><table><tr><th>Ambassador</th><th>College</th><th>WhatsApp</th><th>Code</th><th>Referrals</th></tr>
+ ${d.approved.length?d.approved.map(r=>html`<tr key=${r.code}><td>${r.name}</td><td>${r.college}</td><td>${r.phone}</td><td>${r.code}</td><td><b>${r.referrals}</b></td></tr>`):html`<tr><td colSpan="5" className="mute">No approved ambassadors yet.</td></tr>`}</table></section>`}`}
+
+function App(){
+ const[token,setToken]=useState(localStorage.getItem('t')||''),[me,setMe]=useState(null),[ld,setLd]=useState(!!token);
+ const out=()=>{localStorage.removeItem('t');setToken('');setMe(null)};
+ const refresh=async()=>{try{setMe(await api('/api/me',{},token))}catch(e){out()}setLd(false)};
+ useEffect(()=>{if(token)refresh()},[]);
+ const done=d=>{localStorage.setItem('t',d.token);setToken(d.token);setMe(d.user)};
+ const[hs,setHs]=useState(location.hash);
+ useEffect(()=>{const f=()=>setHs(location.hash);addEventListener('hashchange',f);return()=>removeEventListener('hashchange',f)},[]);
+ const admin=hs==='#admin';
+ return html`<header><b>NxtWave · Build60</b>${me&&!admin&&html`<button className="lk" onClick=${out}>Log out</button>`}</header>
+ ${admin?html`<${Admin}/>`:ld?html`<p className="mute">Loading…</p>`:!me?html`<${Auth} onDone=${done}/>`:me.role==='ambassador'?html`<${Ambassador} me=${me} refresh=${refresh}/>`:html`<${Student} me=${me}/>`}
+ <p style=${{textAlign:'center',marginTop:32,fontSize:'.85rem'}}><a className="mute" href=${admin?'#':'#admin'}>${admin?'Back to site':'Admin'}</a></p>`}
+ReactDOM.createRoot(document.getElementById('root')).render(html`<${App}/>`);
+</script></body></html>
